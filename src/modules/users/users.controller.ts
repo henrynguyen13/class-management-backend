@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './schemas/user.schema';
-import { UpdateUserDto } from './dtos/update-user.dto';
 import { Query as ExpressQuery } from 'express-serve-static-core';
 import { AuthGuard } from '@nestjs/passport';
+import { IUpdateUser } from './users.interface';
 @Controller('users')
 export class UsersController {
   constructor(private userService: UsersService) {}
@@ -32,7 +32,7 @@ export class UsersController {
   @Put('/:id')
   async updateUser(
     @Param('id') id: string,
-    @Body() user: UpdateUserDto,
+    @Body() user: IUpdateUser,
   ): Promise<User> {
     return this.userService.updatedById(id, user);
   }
