@@ -4,7 +4,7 @@ import { User } from './schemas/user.schema';
 import * as mongoose from 'mongoose';
 import { Query } from 'express-serve-static-core';
 import { Common } from 'src/common/common.constants';
-import { IUpdateUser } from './users.interface';
+import { IUpdateUser, IUser } from './users.interface';
 @Injectable()
 export class UsersService {
   constructor(
@@ -12,7 +12,7 @@ export class UsersService {
     private userModel: mongoose.Model<User>,
   ) {}
 
-  async findAll(query: Query): Promise<User[]> {
+  async findAll(query: Query): Promise<IUser[]> {
     const perPage = Common.PERPAGE;
     const currentPage = Number(query.page) || Common.PAGE;
     const skip = perPage * (currentPage - 1);
@@ -32,7 +32,7 @@ export class UsersService {
     return users;
   }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<IUser> {
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -40,14 +40,14 @@ export class UsersService {
     return user;
   }
 
-  async updatedById(id: string, user: IUpdateUser): Promise<User> {
+  async updatedById(id: string, user: IUpdateUser): Promise<IUser> {
     return await this.userModel.findByIdAndUpdate(id, user, {
       new: true,
       runValidators: true,
     });
   }
 
-  async deleteById(id: string): Promise<User> {
+  async deleteById(id: string): Promise<IUser> {
     return await this.userModel.findByIdAndDelete(id);
   }
 }

@@ -13,19 +13,19 @@ import { UsersService } from './users.service';
 import { User } from './schemas/user.schema';
 import { Query as ExpressQuery } from 'express-serve-static-core';
 import { AuthGuard } from '@nestjs/passport';
-import { IUpdateUser } from './users.interface';
+import { IUpdateUser, IUser } from './users.interface';
 @Controller('users')
+@UseGuards(AuthGuard())
 export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Get()
-  @UseGuards(AuthGuard())
-  async getAllUsers(@Query() query: ExpressQuery): Promise<User[]> {
+  async getAllUsers(@Query() query: ExpressQuery): Promise<IUser[]> {
     return this.userService.findAll(query);
   }
 
   @Get('/:id')
-  async getUser(@Param('id') id: string): Promise<User> {
+  async getUser(@Param('id') id: string): Promise<IUser> {
     return this.userService.findById(id);
   }
 
@@ -33,12 +33,12 @@ export class UsersController {
   async updateUser(
     @Param('id') id: string,
     @Body() user: IUpdateUser,
-  ): Promise<User> {
+  ): Promise<IUser> {
     return this.userService.updatedById(id, user);
   }
 
   @Delete('/:id')
-  async deleteUser(@Param('id') id: string): Promise<User> {
+  async deleteUser(@Param('id') id: string): Promise<IUser> {
     return this.userService.deleteById(id);
   }
 }
