@@ -4,11 +4,10 @@ import { Class } from './schemas/class.schema';
 import mongoose from 'mongoose';
 import { Query } from 'express-serve-static-core';
 import { Common } from 'src/common/common.constants';
-import { IUpdateClass } from './class.interface';
+import { IClass, IUpdateClass } from './class.interface';
 import { CreateClassDto } from './dtos/create-class.dto';
 import { User } from '../users/schemas/user.schema';
-import { IUser } from '../users/users.interface';
-import { Role } from 'src/common/common.interface';
+import { IGetListResponse, Role } from 'src/common/common.interface';
 import { AddStudentDto } from './dtos/add-student.dto';
 @Injectable()
 export class ClassService {
@@ -20,7 +19,7 @@ export class ClassService {
     private userModel: mongoose.Model<User>,
   ) {}
 
-  async findAll(query: Query): Promise<Class[]> {
+  async findAll(query: Query): Promise<IGetListResponse<Class>> {
     const perPage = Common.PERPAGE;
     const currentPage = Number(query.page) || Common.PAGE;
     const skip = perPage * (currentPage - 1);
@@ -32,26 +31,17 @@ export class ClassService {
           },
         }
       : {};
-
+    const allClasses = await this.classModel.find({ ...keyword });
     const classes = await this.classModel
       .find({ ...keyword })
       .limit(perPage)
       .skip(skip);
-    return classes;
+    return { items: classes, totalItems: allClasses.length };
   }
 
   async createClass(dto: CreateClassDto, users: User[]): Promise<Class> {
     const data = Object.assign({}, dto, { users });
     return await this.classModel.create(data);
-  }
-  async findById(id: string): Promise<Class> {
-    const mclass = await this.classModel.findById(id).populate('users').exec();
-
-    if (!mclass) {
-      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
-    }
-    console.log('Populated class:', mclass);
-    return mclass;
   }
 
   async updateClassById(id: string, dto: IUpdateClass): Promise<Class> {
@@ -64,14 +54,30 @@ export class ClassService {
   async deleteClass(id: string): Promise<Class> {
     return await this.classModel.findByIdAndDelete(id);
   }
+  async findById(id: string): Promise<IClass> {
+    // const mclass = await this.classModel.findById(id).populate('users').exec();
+    const mclass = await this.classModel.findById(id);
+
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    const totalStudents = mclass.users.filter(
+      (user) => user.role !== undefined && user.role === Role.STUDENT,
+    ).length;
+
+    return { class: mclass, totalStudents };
+  }
 
   async addStudentToClass(classId: string, dto: AddStudentDto): Promise<Class> {
-    const mclass = await this.classModel.findById(classId).exec();
+    const mclass = await this.classModel.findById(classId);
 
     if (!mclass)
       throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
 
-    const student = await this.userModel.findOne({ email: dto.email }).exec();
+    const student = await this.userModel
+      .findOne({ email: dto.email })
+      .lean()
+      .exec();
     if (!student)
       throw new HttpException(
         'This email is not registered',
@@ -81,13 +87,28 @@ export class ClassService {
     if (student.role !== Role.STUDENT) {
       throw new HttpException('User is not a student', HttpStatus.BAD_REQUEST);
     }
-    if (!mclass.users) {
+    const isEmailExisted = mclass.users.some(
+      (user) => user.email === dto.email,
+    );
+    if (isEmailExisted)
+      throw new HttpException(
+        'Student is already in the classroom',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (!mclass?.users) {
       mclass.users = [];
     }
 
-    mclass.users.push(student);
-    await mclass.save();
-    console.log('Updated class:', mclass);
+    mclass.users = [...mclass.users, student];
+    await this.classModel
+      .findOneAndUpdate(
+        { _id: classId },
+        { users: mclass.users },
+        { new: true },
+      )
+      .exec();
+
+    // await mclass.save();
     return mclass;
   }
 }

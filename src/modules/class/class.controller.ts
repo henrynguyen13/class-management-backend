@@ -15,21 +15,24 @@ import { AuthGuard } from '@nestjs/passport';
 import { Query as ExpressQuery } from 'express-serve-static-core';
 import { Class } from './schemas/class.schema';
 import { CreateClassDto } from './dtos/create-class.dto';
-import { IUpdateClass } from './class.interface';
+import { IClass, IUpdateClass } from './class.interface';
 import { AddStudentDto } from './dtos/add-student.dto';
 import { User } from '../users/schemas/user.schema';
+import { IGetListResponse } from 'src/common/common.interface';
 @Controller('classes')
 @UseGuards(AuthGuard())
 export class ClassController {
   constructor(private classService: ClassService) {}
 
   @Get()
-  async getAllClasses(@Query() query: ExpressQuery): Promise<Class[]> {
+  async getAllClasses(
+    @Query() query: ExpressQuery,
+  ): Promise<IGetListResponse<Class>> {
     return this.classService.findAll(query);
   }
 
   @Get('/:id')
-  async getClassById(@Param('id') id: string): Promise<Class> {
+  async getClassById(@Param('id') id: string): Promise<IClass> {
     return this.classService.findById(id);
   }
 
