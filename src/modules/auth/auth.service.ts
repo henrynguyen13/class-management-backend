@@ -32,7 +32,9 @@ export class AuthService {
     return { user, token };
   }
 
-  async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ data: { user: User; token: string } }> {
     const { email, password } = loginDto;
 
     const user = await this.userModel.findOne({ email });
@@ -53,6 +55,6 @@ export class AuthService {
       id: user._id,
     });
 
-    return { user, token };
+    return { data: { user, token } };
   }
 }

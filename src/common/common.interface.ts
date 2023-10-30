@@ -1,3 +1,4 @@
+import { AxiosResponse } from 'axios';
 export interface IQuery {
   id?: string;
   page?: number;
@@ -22,3 +23,14 @@ export interface IBase {
 }
 
 export type baseFields = 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy';
+
+// export interface IBodyResponse<T> extends AxiosResponse {
+//   success?: boolean;
+//   isRequestError?: boolean;
+//   message?: string;
+//   data: T;
+// }
+
+export interface IBodyResponse<T> {
+  data: T;
+}

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -18,21 +19,19 @@ import { CreateClassDto } from './dtos/create-class.dto';
 import { IClass, IUpdateClass } from './class.interface';
 import { AddStudentDto } from './dtos/add-student.dto';
 import { User } from '../users/schemas/user.schema';
-import { IGetListResponse } from 'src/common/common.interface';
+import { IBodyResponse, IGetListResponse } from 'src/common/common.interface';
 @Controller('classes')
 @UseGuards(AuthGuard())
 export class ClassController {
   constructor(private classService: ClassService) {}
 
   @Get()
-  async getAllClasses(
-    @Query() query: ExpressQuery,
-  ): Promise<IGetListResponse<Class>> {
+  async getAllClasses(@Query() query: ExpressQuery) {
     return this.classService.findAll(query);
   }
 
   @Get('/:id')
-  async getClassById(@Param('id') id: string): Promise<IClass> {
+  async getClassById(@Param('id') id: string) {
     return this.classService.findById(id);
   }
 
@@ -41,7 +40,7 @@ export class ClassController {
     return this.classService.createClass(body, [req.user]);
   }
 
-  @Put('/:id')
+  @Patch('/:id')
   async updateClass(
     @Param('id') id: string,
     @Body() body: IUpdateClass,

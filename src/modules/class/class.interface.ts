@@ -11,12 +11,13 @@ export enum ClassStatus {
 export interface IUpdateClass {
   id: string;
   name?: string;
+  code?: string;
   description?: string;
   status?: string;
   avatar?: string;
 }
 
 export interface IClass {
-  class: Class;
+  data: Class;
   totalStudents: number;
 }

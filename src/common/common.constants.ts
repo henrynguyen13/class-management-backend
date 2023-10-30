@@ -5,3 +5,8 @@ export enum Common {
   SORT_BY_AESC = 'aesc',
   SORT_BY_CREATED_AT = 'createdAt',
 }
+
+export enum OrderDirection {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}

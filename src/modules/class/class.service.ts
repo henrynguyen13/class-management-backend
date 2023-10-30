@@ -7,7 +7,11 @@ import { Common } from 'src/common/common.constants';
 import { IClass, IUpdateClass } from './class.interface';
 import { CreateClassDto } from './dtos/create-class.dto';
 import { User } from '../users/schemas/user.schema';
-import { IGetListResponse, Role } from 'src/common/common.interface';
+import {
+  IBodyResponse,
+  IGetListResponse,
+  Role,
+} from 'src/common/common.interface';
 import { AddStudentDto } from './dtos/add-student.dto';
 @Injectable()
 export class ClassService {
@@ -19,7 +23,7 @@ export class ClassService {
     private userModel: mongoose.Model<User>,
   ) {}
 
-  async findAll(query: Query): Promise<IGetListResponse<Class>> {
+  async findAll(query: Query): Promise<{ data: IGetListResponse<Class> }> {
     const perPage = Common.PERPAGE;
     const currentPage = Number(query.page) || Common.PAGE;
     const skip = perPage * (currentPage - 1);
@@ -36,7 +40,7 @@ export class ClassService {
       .find({ ...keyword })
       .limit(perPage)
       .skip(skip);
-    return { items: classes, totalItems: allClasses.length };
+    return { data: { items: classes, totalItems: allClasses.length } };
   }
 
   async createClass(dto: CreateClassDto, users: User[]): Promise<Class> {
@@ -54,7 +58,7 @@ export class ClassService {
   async deleteClass(id: string): Promise<Class> {
     return await this.classModel.findByIdAndDelete(id);
   }
-  async findById(id: string): Promise<IClass> {
+  async findById(id: string) {
     // const mclass = await this.classModel.findById(id).populate('users').exec();
     const mclass = await this.classModel.findById(id);
 
@@ -65,7 +69,7 @@ export class ClassService {
       (user) => user.role !== undefined && user.role === Role.STUDENT,
     ).length;
 
-    return { class: mclass, totalStudents };
+    return { class: mclass, totalStudents: totalStudents };
   }
 
   async addStudentToClass(classId: string, dto: AddStudentDto): Promise<Class> {

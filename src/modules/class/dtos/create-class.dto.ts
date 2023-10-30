@@ -3,6 +3,9 @@ import { ClassStatus } from '../class.interface';
 import { User } from 'src/modules/users/schemas/user.schema';
 
 export class CreateClassDto {
+  @IsString()
+  readonly code: string;
+
   @IsNotEmpty()
   @IsString()
   readonly name: string;
@@ -11,7 +14,8 @@ export class CreateClassDto {
   readonly description: string;
 
   @IsString()
-  readonly status: ClassStatus;
+  @IsOptional()
+  readonly status?: ClassStatus;
 
   @IsString()
   @IsOptional()

@@ -7,12 +7,14 @@ import { User } from 'src/modules/users/schemas/user.schema';
 })
 export class Class extends Document {
   @Prop()
+  code: string;
+  @Prop()
   name: string;
 
   @Prop()
   description: string;
 
-  @Prop()
+  @Prop({ default: ClassStatus.CREATED })
   status: ClassStatus;
 
   @Prop()
