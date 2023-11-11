@@ -26,7 +26,9 @@ export class ClassController {
   constructor(private classService: ClassService) {}
 
   @Get()
-  async getAllClasses(@Query() query: ExpressQuery) {
+  async getAllClasses(
+    @Query() query: ExpressQuery,
+  ): Promise<{ data: IGetListResponse<Class> }> {
     return this.classService.findAll(query);
   }
 
@@ -58,5 +60,23 @@ export class ClassController {
     @Body() body: AddStudentDto,
   ): Promise<Class> {
     return this.classService.addStudentToClass(id, body);
+  }
+
+  @Delete('/:id/students/:studentId')
+  async deleteStudent(
+    @Param('id') id: string,
+    @Param('studentId') studentId: string,
+  ): Promise<Class> {
+    return this.classService.deleteStudentFromClass(id, studentId);
+  }
+
+  @Patch('/:id/open')
+  async openClass(@Param('id') id: string): Promise<Class> {
+    return this.classService.openClass(id);
+  }
+
+  @Patch('/:id/close')
+  async closeClass(@Param('id') id: string): Promise<Class> {
+    return this.classService.closeClass(id);
   }
 }

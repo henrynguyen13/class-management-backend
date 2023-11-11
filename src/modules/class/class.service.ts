@@ -4,7 +4,7 @@ import { Class } from './schemas/class.schema';
 import mongoose from 'mongoose';
 import { Query } from 'express-serve-static-core';
 import { Common } from 'src/common/common.constants';
-import { IClass, IUpdateClass } from './class.interface';
+import { ClassStatus, IClass, IUpdateClass } from './class.interface';
 import { CreateClassDto } from './dtos/create-class.dto';
 import { User } from '../users/schemas/user.schema';
 import {
@@ -113,6 +113,44 @@ export class ClassService {
       .exec();
 
     // await mclass.save();
+    return mclass;
+  }
+
+  async deleteStudentFromClass(classId: string, studentId: string) {
+    const mclass = await this.classModel.findById(classId);
+
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    mclass.users = mclass.users.filter(
+      (user) => user._id.toString() !== studentId,
+    );
+    await this.classModel
+      .findOneAndUpdate(
+        { _id: classId },
+        { users: mclass.users },
+        { new: true },
+      )
+      .exec();
+    return mclass;
+  }
+
+  async openClass(classId: string): Promise<Class> {
+    const mclass = await this.classModel.findById(classId);
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    mclass.status = ClassStatus.OPENING;
+    await mclass.save();
+    return mclass;
+  }
+  async closeClass(classId: string): Promise<Class> {
+    const mclass = await this.classModel.findById(classId);
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    mclass.status = ClassStatus.CLOSED;
+    await mclass.save();
     return mclass;
   }
 }
