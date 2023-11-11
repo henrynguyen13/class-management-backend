@@ -6,6 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ClassModule } from './modules/class/class.module';
+import { AssignmentModule } from './modules/assignment/assignment.module';
+import { QuestionsModule } from './modules/questions/questions.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
@@ -13,6 +15,8 @@ import { ClassModule } from './modules/class/class.module';
     UsersModule,
     AuthModule,
     ClassModule,
+    AssignmentModule,
+    QuestionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
