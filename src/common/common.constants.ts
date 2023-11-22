@@ -10,3 +10,8 @@ export enum OrderDirection {
   ASC = 'ASC',
   DESC = 'DESC',
 }
+
+export enum Role {
+  TEACHER = 'teacher',
+  STUDENT = 'student',
+}

@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ClassSchema } from '../class/schemas/class.schema';
 import { AssignmentSchema } from './schemas/assignment.schema';
 import { QuestionsModule } from '../questions/questions.module';
+import { QuestionSchema } from '../questions/schemas/question.schema';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { QuestionsModule } from '../questions/questions.module';
       { name: 'Assignment', schema: AssignmentSchema },
     ]),
     MongooseModule.forFeature([{ name: 'Class', schema: ClassSchema }]),
+    MongooseModule.forFeature([{ name: 'Question', schema: QuestionSchema }]),
   ],
   providers: [AssignmentService],
   controllers: [AssignmentController],
