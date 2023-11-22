@@ -66,6 +66,9 @@ export class AssignmentService {
     const assignment = await this.assignmentModel
       .findById(assignmentId)
       .populate({ path: 'class', select: '-users' })
+      .populate({
+        path: 'questions',
+      })
       .exec();
     if (!assignment) {
       throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
