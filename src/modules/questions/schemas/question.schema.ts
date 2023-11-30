@@ -21,6 +21,9 @@ export class Question extends Document {
 
   @Prop()
   assignmentId: string;
+
+  @Prop()
+  isCorrect: string;
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);

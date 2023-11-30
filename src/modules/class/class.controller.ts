@@ -22,6 +22,7 @@ import { IBodyResponse, IGetListResponse } from 'src/common/common.interface';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
+import { AuthGuard } from '@nestjs/passport';
 @Controller('classes')
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class ClassController {
@@ -35,6 +36,13 @@ export class ClassController {
     return this.classService.findAll(query);
   }
 
+  @Get('/my/:userId')
+  async getAllMyClasses(
+    @Param('userId') userId: string,
+    @Query() query: ExpressQuery,
+  ) {
+    return this.classService.findAllMyClass(userId, query);
+  }
   @Roles('teacher')
   @Get('/:id')
   async getClassById(@Param('id') id: string) {

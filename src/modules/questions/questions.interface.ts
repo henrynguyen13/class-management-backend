@@ -8,6 +8,12 @@ export interface IAnswer {
   isCorrect: boolean;
 }
 
+export interface IResponse {
+  seq: number;
+  userAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+}
 export enum QuestionType {
   SINGLE_CHOICE = 'SINGLE_CHOICE',
   MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',

@@ -33,7 +33,7 @@ export class AuthService {
     return { user };
   }
 
-  async login(loginDto: LoginDto): Promise<{ data: { user: User } }> {
+  async login(loginDto: LoginDto): Promise<{ data: User }> {
     const { email, password } = loginDto;
 
     const user = await this.userModel.findOne({ email });
@@ -55,7 +55,7 @@ export class AuthService {
     });
     await user.save();
 
-    return { data: { user } };
+    return { data: user };
   }
 
   async logout(userId: string) {

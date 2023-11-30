@@ -7,4 +7,7 @@ export class CreateQuestionDto {
 
   @IsArray()
   readonly answers: IAnswer[];
+
+  @IsString()
+  readonly isCorrect: string;
 }

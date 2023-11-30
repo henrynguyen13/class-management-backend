@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AssignmentService } from './assignment.service';
 import { CreateAssignmentDto } from './dtos/create-assignment.dto';
@@ -14,7 +15,11 @@ import { Assignment } from './schemas/assignment.schema';
 import { UpdateAssignmentDto } from './dtos/update-assignment.dto';
 import { Query as ExpressQuery } from 'express-serve-static-core';
 import { CreateQuestionDto, UpdateQuestionDto } from '../questions/dtos';
+import { CreateResponseDto } from '../responses/dtos/create-response.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { LoginUser } from 'src/common/decorators/login-user.decorator';
 
+@UseGuards(JwtAuthGuard)
 @Controller('classes/:classId/assignment')
 export class AssignmentController {
   constructor(private assignmentService: AssignmentService) {}
@@ -118,6 +123,34 @@ export class AssignmentController {
       classId,
       assignmentId,
       questionId,
+    );
+  }
+
+  @Post('/:id/response')
+  async createAResponse(
+    @LoginUser() user,
+    @Param('id') assignmentId: string,
+    @Param('classId') classId: string,
+    @Body() dto: CreateResponseDto[],
+  ) {
+    return this.assignmentService.createAResponse(
+      user._id,
+      classId,
+      assignmentId,
+      dto,
+    );
+  }
+
+  @Get('/:id/response')
+  async getAResponse(
+    @LoginUser() user,
+    @Param('id') assignmentId: string,
+    @Param('classId') classId: string,
+  ) {
+    return this.assignmentService.getAResponses(
+      user._id,
+      classId,
+      assignmentId,
     );
   }
 }

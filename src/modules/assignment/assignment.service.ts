@@ -10,7 +10,9 @@ import { Common } from 'src/common/common.constants';
 import { IGetListResponse } from 'src/common/common.interface';
 import { CreateQuestionDto, UpdateQuestionDto } from '../questions/dtos';
 import { Question } from '../questions/schemas/question.schema';
-
+import { Response } from '../responses/schemas/response.schema';
+import { CreateResponseDto } from '../responses/dtos/create-response.dto';
+import { LoginUser } from 'src/common/decorators/login-user.decorator';
 @Injectable()
 export class AssignmentService {
   constructor(
@@ -20,6 +22,8 @@ export class AssignmentService {
     private classModel: mongoose.Model<Class>,
     @InjectModel(Question.name)
     private questionModel: mongoose.Model<Question>,
+    @InjectModel(Response.name)
+    private responseModel: mongoose.Model<Response>,
   ) {}
   async createAssignment(
     dto: CreateAssignmentDto,
@@ -67,7 +71,7 @@ export class AssignmentService {
       .findById(assignmentId)
       .populate({ path: 'class', select: '-users' })
       .populate({
-        path: 'questions',
+        path: 'question',
       })
       .exec();
     if (!assignment) {
@@ -232,5 +236,54 @@ export class AssignmentService {
     }
 
     return await this.questionModel.findByIdAndDelete(questionId);
+  }
+
+  async createAResponse(
+    userId: string,
+    classId: string,
+    assignmentId: string,
+    dto: CreateResponseDto[],
+  ): Promise<Response> {
+    const mclass = await this.classModel.findById(classId);
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    const assignment = await this.assignmentModel.findById(assignmentId);
+    if (!assignment) {
+      throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
+    }
+
+    const responseData = {
+      response: dto,
+      userId,
+      classId,
+      assignmentId,
+    };
+    return await this.responseModel.create(responseData);
+  }
+
+  async getAResponses(
+    userId: string,
+    classId: string,
+    assignmentId: string,
+  ): Promise<{ data: IGetListResponse<Response> }> {
+    const mclass = await this.classModel.findById(classId);
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    const assignment = await this.assignmentModel.findById(assignmentId);
+    if (!assignment) {
+      throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
+    }
+
+    const responses = await this.responseModel
+      .find({
+        userId,
+        classId,
+        assignmentId,
+      })
+      .exec();
+
+    return { data: { items: responses, totalItems: responses.length } };
   }
 }

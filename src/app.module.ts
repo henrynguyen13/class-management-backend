@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ClassModule } from './modules/class/class.module';
 import { AssignmentModule } from './modules/assignment/assignment.module';
 import { QuestionsModule } from './modules/questions/questions.module';
+import { ResponsesModule } from './modules/responses/responses.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
@@ -17,6 +18,7 @@ import { QuestionsModule } from './modules/questions/questions.module';
     ClassModule,
     AssignmentModule,
     QuestionsModule,
+    ResponsesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -9,4 +9,8 @@ export class UpdateQuestionDto {
   @IsOptional()
   @IsArray()
   readonly answers: IAnswer[];
+
+  @IsOptional()
+  @IsString()
+  readonly isCorrect: string;
 }

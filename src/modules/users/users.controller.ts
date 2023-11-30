@@ -5,10 +5,12 @@ import {
   Get,
   Param,
   Post,
+  Req,
   Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UsersService } from './users.service';
 import { User } from './schemas/user.schema';
 import { Query as ExpressQuery } from 'express-serve-static-core';
@@ -44,4 +46,9 @@ export class UsersController {
   async deleteUser(@Param('id') id: string): Promise<User> {
     return this.userService.deleteById(id);
   }
+
+  // @Get('/profile/:id')
+  // async getMyProfile(@Req() req: Request, @Param('id') id: string) {
+  //   return this.userService.getMyProfile(req);
+  // }
 }

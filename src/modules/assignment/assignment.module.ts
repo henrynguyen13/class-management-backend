@@ -7,16 +7,17 @@ import { ClassSchema } from '../class/schemas/class.schema';
 import { AssignmentSchema } from './schemas/assignment.schema';
 import { QuestionsModule } from '../questions/questions.module';
 import { QuestionSchema } from '../questions/schemas/question.schema';
-
+import { ResponseSchema } from '../responses/schemas/response.schema';
 @Module({
   imports: [
     ClassModule,
     QuestionsModule,
     MongooseModule.forFeature([
       { name: 'Assignment', schema: AssignmentSchema },
+      { name: 'Class', schema: ClassSchema },
+      { name: 'Question', schema: QuestionSchema },
+      { name: 'Response', schema: ResponseSchema },
     ]),
-    MongooseModule.forFeature([{ name: 'Class', schema: ClassSchema }]),
-    MongooseModule.forFeature([{ name: 'Question', schema: QuestionSchema }]),
   ],
   providers: [AssignmentService],
   controllers: [AssignmentController],
