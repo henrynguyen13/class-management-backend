@@ -14,6 +14,7 @@ export class Assignment extends Document {
 
   @Prop()
   expiredAt: Date;
+
   @Prop({ type: Types.ObjectId, ref: 'Question' })
   question: Question;
 

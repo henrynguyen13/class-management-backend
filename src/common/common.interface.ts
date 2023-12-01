@@ -34,3 +34,9 @@ export type baseFields = 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy';
 export interface IBodyResponse<T> {
   data: T;
 }
+
+export interface IJwtPayload {
+  _id: string;
+  username: string;
+  role: string;
+}

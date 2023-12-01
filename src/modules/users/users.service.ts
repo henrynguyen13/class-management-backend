@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  Req,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
@@ -11,6 +12,7 @@ import { Query } from 'express-serve-static-core';
 import { Common } from 'src/common/common.constants';
 import { IUpdateUser } from './users.interface';
 import { IGetListResponse } from 'src/common/common.interface';
+import { Request } from 'express';
 @Injectable()
 export class UsersService {
   constructor(
@@ -60,5 +62,18 @@ export class UsersService {
 
   async deleteById(id: string): Promise<User> {
     return await this.userModel.findByIdAndDelete(id);
+  }
+
+  async getMyProfile(@Req() request: Request): Promise<User> {
+    const authenticatedUserId = (request.user as User)._id;
+
+    const user = await this.userModel
+      .findById(authenticatedUserId)
+      .select('-password');
+
+    if (!user) {
+      throw new NotFoundException('No user found');
+    }
+    return user;
   }
 }

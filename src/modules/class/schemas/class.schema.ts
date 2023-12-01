@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ClassStatus } from '../class.interface';
+import * as mongoose from 'mongoose';
 import { Document, SchemaType, Types } from 'mongoose';
 import { User } from 'src/modules/users/schemas/user.schema';
 @Schema({
@@ -19,7 +20,7 @@ export class Class extends Document {
 
   @Prop()
   avatar: string;
-  @Prop({ type: Types.ObjectId, ref: 'User' })
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
   users: User[];
 }
 

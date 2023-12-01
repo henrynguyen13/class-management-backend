@@ -14,7 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(signUpDto: SignUpDto): Promise<{ user: User; token: string }> {
+  async signUp(signUpDto: SignUpDto): Promise<{ user: User }> {
     const { username, email, password, role } = signUpDto;
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -25,16 +25,15 @@ export class AuthService {
       role,
     });
 
-    const token = this.jwtService.sign({
+    user.token = this.jwtService.sign({
       id: user._id,
     });
+    user.save();
 
-    return { user, token };
+    return { user };
   }
 
-  async login(
-    loginDto: LoginDto,
-  ): Promise<{ data: { user: User; token: string } }> {
+  async login(loginDto: LoginDto): Promise<{ data: User }> {
     const { email, password } = loginDto;
 
     const user = await this.userModel.findOne({ email });
@@ -51,10 +50,22 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const token = this.jwtService.sign({
+    user.token = this.jwtService.sign({
       id: user._id,
     });
+    await user.save();
 
-    return { data: { user, token } };
+    return { data: user };
+  }
+
+  async logout(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new HttpException('Invalid user', HttpStatus.BAD_REQUEST);
+    }
+
+    user.token = null;
+    await user.save();
+    return true;
   }
 }
