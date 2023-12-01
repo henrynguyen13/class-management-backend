@@ -13,7 +13,7 @@ export class Question extends Document {
   @Prop()
   text: string;
 
-  @Prop({ type: [{ text: String, isCorrect: Boolean }] })
+  @Prop({ type: [{ text: String, isCorrect: Boolean, idx: Number }] })
   answers: IAnswer[];
 
   @Prop()
@@ -21,9 +21,6 @@ export class Question extends Document {
 
   @Prop()
   assignmentId: string;
-
-  @Prop()
-  isCorrect: string;
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);

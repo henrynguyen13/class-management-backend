@@ -13,6 +13,7 @@ import { Question } from '../questions/schemas/question.schema';
 import { Response } from '../responses/schemas/response.schema';
 import { CreateResponseDto } from '../responses/dtos/create-response.dto';
 import { LoginUser } from 'src/common/decorators/login-user.decorator';
+
 @Injectable()
 export class AssignmentService {
   constructor(
@@ -255,7 +256,7 @@ export class AssignmentService {
 
     const responseData = {
       response: dto,
-      userId,
+      userId, // chỗ tạo thì để là userId, chuẩn
       classId,
       assignmentId,
     };
@@ -275,13 +276,50 @@ export class AssignmentService {
     if (!assignment) {
       throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
     }
+    console.log('userId', userId);
+    console.log('type userId', typeof userId);
+
+    console.log('classId', classId);
+    console.log('assID', assignmentId);
 
     const responses = await this.responseModel
       .find({
-        userId,
+        userId, // cai nay cung vay dung k a, chuẩn
         classId,
         assignmentId,
       })
+      // .populate({ path: 'user', select: ['username', 'email'] })
+      .populate([
+        {
+          path: 'user',
+          select: ['username', 'email'],
+        },
+      ])
+      .lean()
+      .exec();
+    console.log(responses);
+    return { data: { items: responses, totalItems: responses.length } };
+  }
+
+  async getAllAResposes(
+    classId: string,
+    assignmentId: string,
+  ): Promise<{ data: IGetListResponse<Response> }> {
+    const mclass = await this.classModel.findById(classId);
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    const assignment = await this.assignmentModel.findById(assignmentId);
+    if (!assignment) {
+      throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
+    }
+
+    const responses = await this.responseModel
+      .find({
+        classId,
+        assignmentId,
+      })
+      .populate({ path: 'user', select: ['username', 'email'] })
       .exec();
 
     return { data: { items: responses, totalItems: responses.length } };

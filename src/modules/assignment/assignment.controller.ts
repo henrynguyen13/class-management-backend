@@ -153,4 +153,12 @@ export class AssignmentController {
       assignmentId,
     );
   }
+
+  @Get('/:id/responses')
+  async getAllAResponses(
+    @Param('id') assignmentId: string,
+    @Param('classId') classId: string,
+  ) {
+    return this.assignmentService.getAllAResposes(classId, assignmentId);
+  }
 }

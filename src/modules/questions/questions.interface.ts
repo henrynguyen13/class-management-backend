@@ -6,6 +6,7 @@ export interface IQuestion {
 export interface IAnswer {
   text: string;
   isCorrect: boolean;
+  idx: number;
 }
 
 export interface IResponse {

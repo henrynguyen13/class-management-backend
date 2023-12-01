@@ -1,4 +1,4 @@
-import { IsArray, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsString } from 'class-validator';
 import { IAnswer } from '../questions.interface';
 
 export class CreateQuestionDto {
@@ -7,7 +7,4 @@ export class CreateQuestionDto {
 
   @IsArray()
   readonly answers: IAnswer[];
-
-  @IsString()
-  readonly isCorrect: string;
 }
