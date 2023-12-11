@@ -47,6 +47,7 @@ export class ClassService {
       .limit(perPage)
       .skip(skip)
       .exec();
+
     const [allClasses, classes] = await Promise.all([
       allClassesPromise,
       classesPromise,

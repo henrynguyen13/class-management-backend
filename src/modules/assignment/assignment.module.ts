@@ -8,6 +8,7 @@ import { AssignmentSchema } from './schemas/assignment.schema';
 import { QuestionsModule } from '../questions/questions.module';
 import { QuestionSchema } from '../questions/schemas/question.schema';
 import { ResponseSchema } from '../responses/schemas/response.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 @Module({
   imports: [
     ClassModule,
@@ -19,7 +20,7 @@ import { ResponseSchema } from '../responses/schemas/response.schema';
       { name: 'Response', schema: ResponseSchema },
     ]),
   ],
-  providers: [AssignmentService],
+  providers: [AssignmentService, CloudinaryService],
   controllers: [AssignmentController],
 })
 export class AssignmentModule {}

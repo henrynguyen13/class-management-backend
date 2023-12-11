@@ -7,7 +7,10 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AssignmentService } from './assignment.service';
 import { CreateAssignmentDto } from './dtos/create-assignment.dto';
@@ -18,11 +21,17 @@ import { CreateQuestionDto, UpdateQuestionDto } from '../questions/dtos';
 import { CreateResponseDto } from '../responses/dtos/create-response.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { LoginUser } from 'src/common/decorators/login-user.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CreateMarkResponseDto } from '../responses/dtos/create-mark-response.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('classes/:classId/assignment')
 export class AssignmentController {
-  constructor(private assignmentService: AssignmentService) {}
+  constructor(
+    private assignmentService: AssignmentService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post('')
   async createAssignment(
@@ -126,18 +135,45 @@ export class AssignmentController {
     );
   }
 
-  @Post('/:id/response')
-  async createAResponse(
+  @Post('/:id/response/test')
+  async createATestResponse(
     @LoginUser() user,
     @Param('id') assignmentId: string,
     @Param('classId') classId: string,
     @Body() dto: CreateResponseDto[],
   ) {
-    return this.assignmentService.createAResponse(
+    return this.assignmentService.createATestResponse(
       user._id,
       classId,
       assignmentId,
       dto,
+    );
+  }
+
+  @Post('/:id/response/upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        files: 1,
+        fileSize: 10 * 1024 * 1024,
+      },
+    }),
+  )
+  async createAUploadResponse(
+    @LoginUser() user,
+    @Param('id') assignmentId: string,
+    @Param('classId') classId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const res = await this.cloudinaryService.uploadImageToCloudinary(
+      file,
+      'assignments',
+    );
+    return this.assignmentService.createAUploadResponse(
+      user._id,
+      classId,
+      assignmentId,
+      { url: res.secure_url, format: res.format },
     );
   }
 
@@ -146,11 +182,13 @@ export class AssignmentController {
     @LoginUser() user,
     @Param('id') assignmentId: string,
     @Param('classId') classId: string,
+    @Query() query: ExpressQuery,
   ) {
     return this.assignmentService.getAResponses(
       user._id,
       classId,
       assignmentId,
+      query,
     );
   }
 
@@ -160,5 +198,33 @@ export class AssignmentController {
     @Param('classId') classId: string,
   ) {
     return this.assignmentService.getAllAResposes(classId, assignmentId);
+  }
+
+  @Get('/:id/responses/:responseId')
+  async getAResponseById(
+    @Param('id') assignmentId: string,
+    @Param('classId') classId: string,
+    @Param('responseId') responseId: string,
+  ) {
+    return this.assignmentService.getAResponseById(
+      classId,
+      assignmentId,
+      responseId,
+    );
+  }
+
+  @Post('/:id/responses/:responseId/mark')
+  async markResponse(
+    @Param('id') assignmentId: string,
+    @Param('classId') classId: string,
+    @Param('responseId') responseId: string,
+    @Body() dto: CreateMarkResponseDto,
+  ) {
+    return this.assignmentService.markResponse(
+      classId,
+      assignmentId,
+      responseId,
+      dto,
+    );
   }
 }

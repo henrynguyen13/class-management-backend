@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAssignmentDto } from './dtos/create-assignment.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Types } from 'mongoose';
+import mongoose from 'mongoose';
 import { Assignment } from './schemas/assignment.schema';
 import { Class } from '../class/schemas/class.schema';
 import { UpdateAssignmentDto } from './dtos/update-assignment.dto';
@@ -12,8 +12,8 @@ import { CreateQuestionDto, UpdateQuestionDto } from '../questions/dtos';
 import { Question } from '../questions/schemas/question.schema';
 import { Response } from '../responses/schemas/response.schema';
 import { CreateResponseDto } from '../responses/dtos/create-response.dto';
-import { LoginUser } from 'src/common/decorators/login-user.decorator';
-
+import { AssignmentType } from './assignment.interface';
+import { CreateMarkResponseDto } from '../responses/dtos/create-mark-response.dto';
 @Injectable()
 export class AssignmentService {
   constructor(
@@ -135,6 +135,8 @@ export class AssignmentService {
     if (!assignment) {
       throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
     }
+    assignment.type = AssignmentType.TEST;
+    await assignment.save();
 
     const questionData = {
       ...dto,
@@ -239,7 +241,7 @@ export class AssignmentService {
     return await this.questionModel.findByIdAndDelete(questionId);
   }
 
-  async createAResponse(
+  async createATestResponse(
     userId: string,
     classId: string,
     assignmentId: string,
@@ -256,18 +258,23 @@ export class AssignmentService {
 
     const responseData = {
       response: dto,
-      userId, // chỗ tạo thì để là userId, chuẩn
+      userId,
       classId,
+      type: AssignmentType.TEST,
       assignmentId,
+      mark: ((dto.filter((i) => i.isCorrect).length / dto.length) * 10).toFixed(
+        2,
+      ),
     };
     return await this.responseModel.create(responseData);
   }
 
-  async getAResponses(
+  async createAUploadResponse(
     userId: string,
     classId: string,
     assignmentId: string,
-  ): Promise<{ data: IGetListResponse<Response> }> {
+    dto: any,
+  ): Promise<Response> {
     const mclass = await this.classModel.findById(classId);
     if (!mclass) {
       throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
@@ -276,28 +283,53 @@ export class AssignmentService {
     if (!assignment) {
       throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
     }
-    console.log('userId', userId);
-    console.log('type userId', typeof userId);
+    const responseData = {
+      response: dto,
+      userId,
+      classId,
+      type: AssignmentType.UPLOAD_FILE,
+      assignmentId,
+      mark: '',
+    };
 
-    console.log('classId', classId);
-    console.log('assID', assignmentId);
+    console.log('responseData', responseData);
+    return await this.responseModel.create(responseData);
+  }
 
+  async getAResponses(
+    userId: string,
+    classId: string,
+    assignmentId: string,
+    query: Query,
+  ): Promise<{ data: IGetListResponse<Response> }> {
+    const perPage = Common.PERPAGE;
+    const currentPage = Number(query.page) || Common.PAGE;
+    const skip = perPage * (currentPage - 1);
+    const mclass = await this.classModel.findById(classId);
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    const assignment = await this.assignmentModel.findById(assignmentId);
+    if (!assignment) {
+      throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
+    }
     const responses = await this.responseModel
       .find({
-        userId, // cai nay cung vay dung k a, chuẩn
+        userId,
         classId,
         assignmentId,
       })
-      // .populate({ path: 'user', select: ['username', 'email'] })
       .populate([
         {
           path: 'user',
           select: ['username', 'email'],
         },
       ])
+      .sort({ createdAt: -1 })
+      .limit(perPage)
+      .skip(skip)
       .lean()
       .exec();
-    console.log(responses);
     return { data: { items: responses, totalItems: responses.length } };
   }
 
@@ -319,9 +351,94 @@ export class AssignmentService {
         classId,
         assignmentId,
       })
-      .populate({ path: 'user', select: ['username', 'email'] })
+      .populate({
+        path: 'user',
+        select: ['username', 'email'],
+      })
+      .sort({ createdAt: -1 })
+      .lean()
       .exec();
 
-    return { data: { items: responses, totalItems: responses.length } };
+    const seenEmails: Set<String> = new Set();
+    //return latest response of user
+    const filterResponses = [];
+    for (const response of responses) {
+      const userEmail = response.user[0].email;
+      if (!seenEmails.has(userEmail)) {
+        seenEmails.add(userEmail);
+        filterResponses.push(response);
+      }
+    }
+
+    return {
+      data: { items: filterResponses, totalItems: filterResponses.length },
+    };
+  }
+
+  async getAResponseById(
+    classId: string,
+    assignmentId: string,
+    responseId: string,
+  ): Promise<Response> {
+    const mclass = await this.classModel.findById(classId);
+    if (!mclass) {
+      throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
+    }
+    const assignment = await this.assignmentModel.findById(assignmentId);
+    if (!assignment) {
+      throw new HttpException('No assignment found', HttpStatus.BAD_REQUEST);
+    }
+
+    const response = await this.responseModel
+      .findById(responseId)
+      .populate({
+        path: 'user',
+        select: ['username', 'email'],
+      })
+      .lean()
+      .exec();
+
+    if (!response) {
+      throw new HttpException('No response found', HttpStatus.BAD_REQUEST);
+    }
+
+    return response;
+  }
+
+  async markResponse(
+    classId: string,
+    assignmentId: string,
+    responseId: string,
+    dto: CreateMarkResponseDto,
+  ): Promise<Response> {
+    const response = await this.getAResponseById(
+      classId,
+      assignmentId,
+      responseId,
+    );
+
+    if (response) {
+      await this.responseModel.findByIdAndUpdate(responseId, {
+        $set: {
+          mark: dto?.mark ?? '',
+          comment: dto?.comment ?? '',
+        },
+      });
+
+      const updatedResponse = await this.responseModel
+        .findById(response._id)
+        .populate({
+          path: 'user',
+          select: ['username', 'email'],
+        })
+        .lean()
+        .exec();
+
+      if (!updatedResponse) {
+        throw new HttpException('No response found', HttpStatus.BAD_REQUEST);
+      }
+
+      return updatedResponse;
+    }
   }
 }
