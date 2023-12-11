@@ -1,13 +1,4 @@
-import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsBoolean,
-  IsNumber,
-  IsNumberString,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
-import { IResponse } from 'src/modules/questions/questions.interface';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CreateResponseDto {
   @IsString()

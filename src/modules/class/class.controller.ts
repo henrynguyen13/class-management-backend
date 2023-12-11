@@ -43,7 +43,6 @@ export class ClassController {
   ) {
     return this.classService.findAllMyClass(userId, query);
   }
-  @Roles('teacher')
   @Get('/:id')
   async getClassById(@Param('id') id: string) {
     return this.classService.findById(id);
