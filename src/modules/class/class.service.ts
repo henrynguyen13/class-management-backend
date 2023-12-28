@@ -97,7 +97,10 @@ export class ClassService {
   }
   async findById(id: string) {
     // const mclass = await this.classModel.findById(id).populate('users').exec();
-    const mclass = await this.classModel.findById(id).populate('users').exec();
+    const mclass = await this.classModel
+      .findById(id)
+      .populate({ path: 'users', select: ['username', 'email', 'code'] })
+      .exec();
 
     if (!mclass) {
       throw new HttpException('No class found', HttpStatus.BAD_REQUEST);
