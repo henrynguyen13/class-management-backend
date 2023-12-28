@@ -10,6 +10,7 @@ import { AssignmentModule } from './modules/assignment/assignment.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { ResponsesModule } from './modules/responses/responses.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { AttendanceModule } from './modules/attendance/attendance.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
@@ -21,6 +22,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     QuestionsModule,
     ResponsesModule,
     CloudinaryModule,
+    AttendanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

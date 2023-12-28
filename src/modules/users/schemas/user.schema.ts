@@ -11,6 +11,9 @@ export class User extends Document {
   @Prop({ unique: [true, 'Duplicate email entered'] })
   email: string;
 
+  @Prop({ default: generateRandomCode })
+  code: string;
+
   @Prop()
   password: string;
 
@@ -21,3 +24,10 @@ export class User extends Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+function generateRandomCode(): string {
+  const min = 100000;
+  const max = 999999;
+  const code = Math.floor(Math.random() * (max - min + 1)) + min;
+  return code.toString();
+}
