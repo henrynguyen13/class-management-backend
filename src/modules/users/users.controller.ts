@@ -9,6 +9,9 @@ import {
   Put,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Patch,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { UsersService } from './users.service';
@@ -17,10 +20,15 @@ import { Query as ExpressQuery } from 'express-serve-static-core';
 import { AuthGuard } from '@nestjs/passport';
 import { IUpdateUser } from './users.interface';
 import { IGetListResponse } from 'src/common/common.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 @Controller('users')
 @UseGuards(AuthGuard())
 export class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(
+    private userService: UsersService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get()
   async getAllUsers(
@@ -34,7 +42,7 @@ export class UsersController {
     return this.userService.findById(id);
   }
 
-  @Put('/:id')
+  @Patch('/:id')
   async updateUser(
     @Param('id') id: string,
     @Body() user: IUpdateUser,
@@ -51,4 +59,24 @@ export class UsersController {
   // async getMyProfile(@Req() req: Request, @Param('id') id: string) {
   //   return this.userService.getMyProfile(req);
   // }
+
+  @Post('/:id/avatar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        files: 1,
+        fileSize: 10 * 1024 * 1024,
+      },
+    }),
+  )
+  async uploadAvatar(
+    @Param('id') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const res = await this.cloudinaryService.uploadImageToCloudinary(
+      file,
+      'avatar',
+    );
+    return this.userService.updateAvatar(userId, res.secure_url);
+  }
 }
