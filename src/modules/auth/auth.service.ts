@@ -68,4 +68,34 @@ export class AuthService {
     await user.save();
     return true;
   }
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new HttpException('Invalid user', HttpStatus.BAD_REQUEST);
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw new HttpException(
+        'Current password is not correct',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (currentPassword === newPassword) {
+      throw new HttpException(
+        'The new password must not be the same as the current password',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.token = null;
+    await user.save();
+    return true;
+  }
 }
