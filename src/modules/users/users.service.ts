@@ -35,14 +35,16 @@ export class UsersService {
     const totalUsers = await this.userModel.find({ ...keyword });
     const users = await this.userModel
       .find({ ...keyword })
-      .select('-password')
+      .select(['-password', '-token'])
       .limit(perPage)
       .skip(skip);
     return { items: users, totalItems: totalUsers.length };
   }
 
   async findById(id: string): Promise<User> {
-    const user = await this.userModel.findById(id).select('-password');
+    const user = await this.userModel
+      .findById(id)
+      .select(['-password', '-token']);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -64,16 +66,20 @@ export class UsersService {
     return await this.userModel.findByIdAndDelete(id);
   }
 
-  async getMyProfile(@Req() request: Request): Promise<User> {
-    const authenticatedUserId = (request.user as User)._id;
+  // async getMyProfile(@Req() request: Request): Promise<User> {
+  //   const authenticatedUserId = (request.user as User)._id;
 
-    const user = await this.userModel
-      .findById(authenticatedUserId)
-      .select('-password');
+  //   const user = await this.userModel
+  //     .findById(authenticatedUserId)
+  //     .select('-password');
 
-    if (!user) {
-      throw new NotFoundException('No user found');
-    }
-    return user;
+  //   if (!user) {
+  //     throw new NotFoundException('No user found');
+  //   }
+  //   return user;
+  // }
+
+  async updateAvatar(id: string, dto: any): Promise<User> {
+    return await this.userModel.findByIdAndUpdate(id, { avatar: dto });
   }
 }
