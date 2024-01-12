@@ -11,6 +11,8 @@ import { QuestionsModule } from './modules/questions/questions.module';
 import { ResponsesModule } from './modules/responses/responses.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
+import { MessengersModule } from './modules/messengers/messengers.module';
+import { ChatModule } from './modules/chat/chat.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
@@ -23,6 +25,8 @@ import { AttendanceModule } from './modules/attendance/attendance.module';
     ResponsesModule,
     CloudinaryModule,
     AttendanceModule,
+    MessengersModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

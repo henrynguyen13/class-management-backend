@@ -49,9 +49,11 @@ export class AssignmentService {
     const perPage = Common.PERPAGE;
     const currentPage = Number(query.page) || Common.PAGE;
     const skip = perPage * (currentPage - 1);
-    const allAssignments = await this.assignmentModel.find();
+    const allAssignments = await this.assignmentModel.find({
+      class: { _id: classId },
+    });
     const assignments = await this.assignmentModel
-      .find()
+      .find({ class: { _id: classId } })
       .limit(perPage)
       .sort({ expiredAt: -1 })
       .skip(skip)

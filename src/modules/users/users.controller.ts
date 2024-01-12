@@ -31,11 +31,14 @@ export class UsersController {
   ) {}
 
   @Get()
-  async getAllUsers(
-    @Query() query: ExpressQuery,
-  ): Promise<IGetListResponse<User>> {
-    return this.userService.findAll(query);
+  async getAllUsers() {
+    return this.userService.findAll();
   }
+  // async getAllUsers(
+  //   @Query() query: ExpressQuery,
+  // ): Promise<IGetListResponse<User>> {
+  //   return this.userService.findAll(query);
+  // }
 
   @Get('/:id')
   async getUser(@Param('id') id: string): Promise<User> {
