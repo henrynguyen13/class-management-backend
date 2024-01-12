@@ -20,25 +20,30 @@ export class UsersService {
     private userModel: mongoose.Model<User>,
   ) {}
 
-  async findAll(query: Query): Promise<IGetListResponse<User>> {
-    const perPage = Common.PERPAGE;
-    const currentPage = Number(query.page) || Common.PAGE;
-    const skip = perPage * (currentPage - 1);
-    const keyword = query.keyword
-      ? {
-          username: {
-            $regex: query.keyword,
-            $options: 'i',
-          },
-        }
-      : {};
-    const totalUsers = await this.userModel.find({ ...keyword });
-    const users = await this.userModel
-      .find({ ...keyword })
-      .select(['-password', '-token'])
-      .limit(perPage)
-      .skip(skip);
-    return { items: users, totalItems: totalUsers.length };
+  // async findAll(query: Query): Promise<IGetListResponse<User>> {
+  //   const perPage = Common.PERPAGE;
+  //   const currentPage = Number(query.page) || Common.PAGE;
+  //   const skip = perPage * (currentPage - 1);
+  //   const keyword = query.keyword
+  //     ? {
+  //         username: {
+  //           $regex: query.keyword,
+  //           $options: 'i',
+  //         },
+  //       }
+  //     : {};
+  //   const totalUsers = await this.userModel.find({ ...keyword });
+  //   const users = await this.userModel
+  //     .find({ ...keyword })
+  //     .select(['-password', '-token'])
+  //     .limit(perPage)
+  //     .skip(skip);
+  //   return { items: users, totalItems: totalUsers.length };
+  // }
+  async findAll() {
+    const users = await this.userModel.find().select(['-password', '-token']);
+
+    return { users: users };
   }
 
   async findById(id: string): Promise<User> {
