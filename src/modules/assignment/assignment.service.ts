@@ -14,6 +14,7 @@ import { Response } from '../responses/schemas/response.schema';
 import { CreateResponseDto } from '../responses/dtos/create-response.dto';
 import { AssignmentType } from './assignment.interface';
 import { CreateMarkResponseDto } from '../responses/dtos/create-mark-response.dto';
+import { QuestionType } from '../questions/questions.interface';
 @Injectable()
 export class AssignmentService {
   constructor(
@@ -141,9 +142,17 @@ export class AssignmentService {
     }
     assignment.type = AssignmentType.TEST;
     await assignment.save();
+    const numOfCorrectAnswer = dto.answers.filter(
+      (answer) => answer.isCorrect === true,
+    ).length;
+    console.log('----', numOfCorrectAnswer);
 
     const questionData = {
       ...dto,
+      type:
+        numOfCorrectAnswer > 1
+          ? QuestionType.MULTIPLE_CHOICE
+          : QuestionType.SINGLE_CHOICE,
       classId: mclass._id,
       assignmentId: assignment._id,
     };
